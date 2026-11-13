@@ -3,11 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title> Anjion Learning</title>
+<title>Free FCI Strategy Webinar | Anjion Learning</title>
 <meta name="description" content="Join Anjion Learning's free live strategy webinar for FCI aspirants. Understand the exam, map the syllabus and leave with a preparation plan.">
 <meta name="theme-color" content="#1F4FD8">
-<link rel="icon" type="image/jpeg" sizes="120x120" href="https://anjionlearning.in/wp-content/uploads/2026/09/anjion_learning_120x120.jpg">
-<link rel="apple-touch-icon" href="https://anjionlearning.in/wp-content/uploads/2026/09/anjion_learning_120x120.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -213,7 +211,7 @@ fbq('track','PageView');
 <script>
 /* ---------- CONFIG ---------- */
 // Paste your Google Apps Script Web App URL here (setup notes at the bottom of this file).
-var LEAD_ENDPOINT = "";
+var LEAD_ENDPOINT = "https://script.google.com/macros/s/AKfycbxkZpOkb6OOt3XrndHDWoNqF3IBJs9NTIqHhKD9q1G_OcwHOQAupcAyaiVafjWr7-0YRA/exec";
 
 (function () {
   var form = document.getElementById('leadForm');
@@ -267,9 +265,13 @@ var LEAD_ENDPOINT = "";
 
     btn.disabled = true; btn.classList.add('loading');
 
-    var send = LEAD_ENDPOINT
-      ? fetch(LEAD_ENDPOINT, { method: 'POST', mode: 'no-cors', body: data })
-      : Promise.resolve(); // demo mode until an endpoint is configured
+    var valid = /^https:\/\/script\.google\.com\/macros\/s\/[^\/]+\/exec$/.test(LEAD_ENDPOINT);
+    if (!valid) {
+      formErr.textContent = 'Setup needed: LEAD_ENDPOINT must be your Apps Script Web App URL (https://script.google.com/macros/s/.../exec), not the Google Sheet link.';
+      btn.disabled = false; btn.classList.remove('loading');
+      return;
+    }
+    var send = fetch(LEAD_ENDPOINT, { method: 'POST', mode: 'no-cors', body: data });
 
     send.then(function () {
       if (window.fbq) fbq('track', 'Lead', { content_name: 'FCI Strategy Webinar', content_category: 'Webinar Registration' });
@@ -292,20 +294,12 @@ var LEAD_ENDPOINT = "";
 </script>
 
 <!--
-LEAD CAPTURE SETUP (Google Sheets, about 5 minutes)
-1. Create a Google Sheet with headers in row 1:
-   timestamp | name | phone | email | post | consent | page | utm_source | utm_medium | utm_campaign | utm_content | fbclid
-2. Extensions > Apps Script. Paste:
-
-   function doPost(e) {
-     var s = SpreadsheetApp.getActiveSheet();
-     var h = s.getRange(1,1,1,s.getLastColumn()).getValues()[0];
-     s.appendRow(h.map(function (k) { return e.parameter[k] || ''; }));
-     return ContentService.createTextOutput('ok');
-   }
-
-3. Deploy > New deployment > Web app. Execute as: Me. Who has access: Anyone. Copy the Web App URL.
-4. Paste the URL into LEAD_ENDPOINT above. For a CRM, call its API from the same Apps Script (UrlFetchApp.fetch), or use Zapier/Make with a Sheets trigger.
+LEAD CAPTURE SETUP (Google Sheets)
+1. Open your sheet > Extensions > Apps Script. Replace everything with the contents of apps-script.gs (the sheet ID is already filled in).
+2. Deploy > New deployment > type "Web app". Execute as: Me. Who has access: Anyone. Authorise when asked.
+3. Copy the Web App URL (ends in /exec) and paste it into LEAD_ENDPOINT above.
+4. Open the /exec URL in a browser. It should say "Anjion Learning lead endpoint is live."
+5. If you edit the script later, use Deploy > Manage deployments > Edit > New version so the same URL keeps working.
 
 META PIXEL SETUP
 1. Replace YOUR_PIXEL_ID (twice) with the Pixel ID from Meta Events Manager.
